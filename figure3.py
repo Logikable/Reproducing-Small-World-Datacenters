@@ -31,6 +31,7 @@ def add_random_links(G, random_links_per_node):
   None
   """
   print('Adding random links...')
+  n = G.number_of_nodes()
   random_links = random_links_per_node * n / 2
   # Store candidate links in a temporary graph so we don't remove
   # a regular link.
@@ -72,7 +73,7 @@ def add_random_links(G, random_links_per_node):
 ### and random links as necessary.
 ### Each return the topology as a NetworkX graph.
 
-def SWRingTopo():
+def SWRingTopo(n=n):
   print('Creating topology: SWRing...')
   G = nx.Graph()
   for i in np.arange(n):
@@ -87,14 +88,15 @@ def SWRingTopo():
   add_random_links(G, random_links)
   return G
 
-def SW2DTorusTopo():
+def SW2DTorusTopo(dims=SW2DTorusDims):
   print('Creating topology: SW2DTorus...')
+  x, y = dims
+  n = x * y
   G = nx.Graph()
   for i in np.arange(n):
     G.add_node(i)
   # Regular links.
   print('Adding regular links...')
-  x, y = SW2DTorusDims
   for i in np.arange(x):
     for j in np.arange(y):
       G.add_edge(i * y + j, (i * y + j + 1) % y)
@@ -105,14 +107,15 @@ def SW2DTorusTopo():
   add_random_links(G, random_links)
   return G
 
-def SW3DHexTorusTopo():
+def SW3DHexTorusTopo(dims=SW3DHexTorusDims):
   print('Creating topology: SW3DHexTorus...')
+  x, y, z = dims
+  n = x * y * z
   G = nx.Graph()
   for i in np.arange(n):
     G.add_node(i)
   # Regular links.
   print('Adding regular links...')
-  x, y, z = SW3DHexTorusDims
   for i in np.arange(x):
     for j in np.arange(y):
       for k in np.arange(z):
@@ -130,14 +133,15 @@ def SW3DHexTorusTopo():
   add_random_links(G, random_links)
   return G
 
-def CamCubeTopo():
+def CamCubeTopo(dims=CamCubeDims):
   print('Creating topology: CamCube...')
+  x, y, z = dims
+  n = x * y * z
   G = nx.Graph()
   for i in np.arange(n):
     G.add_node(i)
   # Regular links.
   print('Adding regular links...')
-  x, y, z = CamCubeDims
   for i in np.arange(x):
     for j in np.arange(y):
       for k in np.arange(z):
@@ -186,10 +190,12 @@ def plot_shortest_path_lengths(topo_func, name):
 ################################# Main #########################################
 
 if __name__ == '__main__':
-  plot_shortest_path_lengths(SWRingTopo, 'SW Ring')
-  plot_shortest_path_lengths(SW2DTorusTopo, 'SW 2DTor')
-  plot_shortest_path_lengths(SW3DHexTorusTopo, 'SW 3DHexTor')
-  plot_shortest_path_lengths(CamCubeTopo, 'CamCube')
-  plt.savefig('shortest_path_lengths.png')
+  # plot_shortest_path_lengths(SWRingTopo, 'SW Ring')
+  # plot_shortest_path_lengths(SW2DTorusTopo, 'SW 2DTor')
+  # plot_shortest_path_lengths(SW3DHexTorusTopo, 'SW 3DHexTor')
+  # plot_shortest_path_lengths(CamCubeTopo, 'CamCube')
+  # plt.savefig('shortest_path_lengths.png')
+
+  SWRingTopo(n=10)
 
   # draw_graph(SW2DTorusTopo())
