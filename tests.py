@@ -45,9 +45,7 @@ class TestSW3DHexTorusTopo(unittest.TestCase):
 
   def test_small(self):
     print('===== SW3DHexTorusTopo =====')
-    # TODO: debug why it's taking forever to construct
-    # x, y, z = 5, 5, 5
-    x, y, z = 3, 3, 3
+    x, y, z = 6, 6, 6
     n = x * y * z
     G = SW3DHexTorusTopo(dims=[x, y, z])
 
@@ -64,7 +62,7 @@ class TestSW3DHexTorusTopo(unittest.TestCase):
 
           if i * y * z + j * z + (k + 1) % z not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i},{j},{k+1})')
-          if ((i % 2 == 0 and k % 2 == 0) or (i % 2 == 1 and k % 2 == 1)) 
+          if ((j + k) % 2 == 1) \
              and i * y * z + ((j + 1) % z) * z + k not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i},{j+1},{k})')
           if ((i + 1) % y) % z * y * z + j * z + k not in neighbors:

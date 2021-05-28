@@ -120,16 +120,14 @@ def SW3DHexTorusTopo(dims=SW3DHexTorusDims):
     for j in np.arange(y):
       for k in np.arange(z):
         index = i * y * z + j * z + k
-        # print(index, i * y * z + j * z + (k + 1) % z,
-        #       i * y * z + ((j + 1) % z) * z + k,
-        #       ((i + 1) % y) % z * y * z + j * z + k)
         # Horizontal edge.
         G.add_edge(index, i * y * z + j * z + (k + 1) % z)
         # Vertical edge.
-        if (i % 2 == 0 and k % 2 == 0) or (i % 2 == 1 and k % 2 == 1):
+        if ((j + k) % 2 == 1):
           G.add_edge(index, i * y * z + ((j + 1) % z) * z + k)
         # Z-dimension edge (labelled as x here).
         G.add_edge(index, ((i + 1) % y) % z * y * z + j * z + k)
+
   # Number of ports assigned to random links.
   random_links = degree - 5
   # Add random_links sets of n/2 random links.
