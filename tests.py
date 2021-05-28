@@ -36,9 +36,9 @@ class TestSW2DTorusTopo(unittest.TestCase):
         self.assertEqual(len(neighbors), 6, 
                          f'node ({i},{j}) does not have 6 edges')
 
-        if (i * y + j + 1) % y not in neighbors:
+        if i * y + (j + 1) % y not in neighbors:
           self.fail(f'no edge between nodes ({i},{j}) and ({i},{j+1})')
-        if ((i + 1) % n) * y + j not in neighbors:
+        if ((i + 1) % x) * y + j not in neighbors:
           self.fail(f'no edge between nodes ({i},{j}) and ({i+1},{j})')
 
 class TestSW3DHexTorusTopo(unittest.TestCase):
@@ -46,8 +46,8 @@ class TestSW3DHexTorusTopo(unittest.TestCase):
   def test_small(self):
     print('===== SW3DHexTorusTopo =====')
     # TODO: debug why it's taking forever to construct
-    return
-    x, y, z = 5, 5, 5
+    # x, y, z = 5, 5, 5
+    x, y, z = 3, 3, 3
     n = x * y * z
     G = SW3DHexTorusTopo(dims=[x, y, z])
 
@@ -62,11 +62,12 @@ class TestSW3DHexTorusTopo(unittest.TestCase):
           self.assertEqual(len(neighbors), 6,
                            f'node ({i},{j},{k}) does not have 6 edges')
 
-          if (index + 1) % z not in neighbors:
+          if i * y * z + j * z + (k + 1) % z not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i},{j},{k+1})')
-          if (j + k) % 2 == 1 and (index + z) % (y * z) not in neighbors:
+          if ((i % 2 == 0 and k % 2 == 0) or (i % 2 == 1 and k % 2 == 1)) 
+             and i * y * z + ((j + 1) % z) * z + k not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i},{j+1},{k})')
-          if (index + y * z) % n not in neighbors:
+          if ((i + 1) % y) % z * y * z + j * z + k not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i+1},{j},{k})')
 
 class TestCamCubeTopo(unittest.TestCase):
@@ -88,11 +89,11 @@ class TestCamCubeTopo(unittest.TestCase):
           self.assertEqual(len(neighbors), 6,
                            f'node ({i},{j},{k}) does not have 6 edges')
 
-          if (index + 1) % z not in neighbors:
+          if i * y * z + j * z + (k + 1) % z not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i},{j},{k+1})')
-          if (index + z) % (y * z) not in neighbors:
+          if i * y * z + ((j + 1) % z) * z + k not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i},{j+1},{k})')
-          if (index + y * z) % n not in neighbors:
+          if ((i + 1) % y) % z * y * z + j * z + k not in neighbors:
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i+1},{j},{k})')
 
 if __name__ == '__main__':
