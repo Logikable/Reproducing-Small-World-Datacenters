@@ -2,7 +2,6 @@ from figure3 import SWRingTopo, SW2DTorusTopo, SW3DHexTorusTopo, CamCubeTopo
 import unittest
 
 class TestSWRingTopo(unittest.TestCase):
-
   def test_small(self):
     print('======== SWRingTopo ========')
     n = 100
@@ -19,7 +18,6 @@ class TestSWRingTopo(unittest.TestCase):
         self.fail(f'no edge between nodes {i} and {(i + 1) % n}')
 
 class TestSW2DTorusTopo(unittest.TestCase):
-
   def test_small(self):
     print('======= SW2DTorusTopo ======')
     x, y = 10, 10
@@ -42,7 +40,6 @@ class TestSW2DTorusTopo(unittest.TestCase):
           self.fail(f'no edge between nodes ({i},{j}) and ({i+1},{j})')
 
 class TestSW3DHexTorusTopo(unittest.TestCase):
-
   def test_small(self):
     print('===== SW3DHexTorusTopo =====')
     x, y, z = 6, 6, 6
@@ -69,7 +66,6 @@ class TestSW3DHexTorusTopo(unittest.TestCase):
             self.fail(f'no edge between nodes ({i},{j},{k}) and ({i+1},{j},{k})')
 
 class TestCamCubeTopo(unittest.TestCase):
-
   def test_small(self):
     print('======== CamCubeTopo =======')
     x, y, z = 5, 5, 5

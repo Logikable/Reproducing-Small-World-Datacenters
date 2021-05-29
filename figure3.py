@@ -2,13 +2,20 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-n = 10240
+n = 1536
 degree = 6
 
-SW2DTorusDims = [80, 128]
-# Depth, long edge (vertical in diagram), short edge (horizontal).
-SW3DHexTorusDims = [20, 16, 32]
-CamCubeDims = [16, 20, 32]
+SW2DTorusDims = (32, 48)
+SW3DHexTorusDims = (16, 8, 12)
+CamCubeDims = (8, 12, 16)
+
+# n = 10240
+# degree = 6
+
+# SW2DTorusDims = [80, 128]
+# # Depth, long edge (vertical in diagram), short edge (horizontal).
+# SW3DHexTorusDims = [20, 16, 32]
+# CamCubeDims = [16, 20, 32]
 
 ############################ Topology Generation ###############################
 
@@ -30,8 +37,8 @@ def add_random_links(G, random_links_per_node):
   Returns:
   None
   """
+  n = len(G)
   print('Adding random links...')
-  n = G.number_of_nodes()
   random_links = random_links_per_node * n / 2
   # Store candidate links in a temporary graph so we don't remove
   # a regular link.
@@ -73,7 +80,7 @@ def add_random_links(G, random_links_per_node):
 ### and random links as necessary.
 ### Each return the topology as a NetworkX graph.
 
-def SWRingTopo(n=n):
+def SWRingTopo(n=n, degree=degree):
   print('Creating topology: SWRing...')
   G = nx.Graph()
   for i in np.arange(n):
@@ -88,7 +95,7 @@ def SWRingTopo(n=n):
   add_random_links(G, random_links)
   return G
 
-def SW2DTorusTopo(dims=SW2DTorusDims):
+def SW2DTorusTopo(dims=SW2DTorusDims, degree=degree):
   print('Creating topology: SW2DTorus...')
   x, y = dims
   n = x * y
@@ -107,7 +114,8 @@ def SW2DTorusTopo(dims=SW2DTorusDims):
   add_random_links(G, random_links)
   return G
 
-def SW3DHexTorusTopo(dims=SW3DHexTorusDims):
+def SW3DHexTorusTopo(dims=SW3DHexTorusDims, degree=degree):
+  assert dims[1] % 2 == 0 and dims[2] % 2 == 0
   print('Creating topology: SW3DHexTorus...')
   x, y, z = dims
   n = x * y * z
@@ -124,9 +132,9 @@ def SW3DHexTorusTopo(dims=SW3DHexTorusDims):
         G.add_edge(index, i * y * z + j * z + (k + 1) % z)
         # Vertical edge.
         if ((j + k) % 2 == 1):
-          G.add_edge(index, i * y * z + ((j + 1) % z) * z + k)
+          G.add_edge(index, i * y * z + ((j + 1) % y) * z + k)
         # Z-dimension edge (labelled as x here).
-        G.add_edge(index, ((i + 1) % y) % z * y * z + j * z + k)
+        G.add_edge(index, ((i + 1) % x) * y * z + j * z + k)
 
   # Number of ports assigned to random links.
   random_links = degree - 5
@@ -134,7 +142,7 @@ def SW3DHexTorusTopo(dims=SW3DHexTorusDims):
   add_random_links(G, random_links)
   return G
 
-def CamCubeTopo(dims=CamCubeDims):
+def CamCubeTopo(dims=CamCubeDims, degree=degree):
   print('Creating topology: CamCube...')
   x, y, z = dims
   n = x * y * z
@@ -150,9 +158,9 @@ def CamCubeTopo(dims=CamCubeDims):
         # Horizontal edge.
         G.add_edge(index, i * y * z + j * z + (k + 1) % z)
         # Vertical edge.
-        G.add_edge(index, i * y * z + ((j + 1) % z) * z + k)
+        G.add_edge(index, i * y * z + ((j + 1) % y) * z + k)
         # Z-dimension edge (labelled as x here).
-        G.add_edge(index, ((i + 1) % y) % z * y * z + j * z + k)
+        G.add_edge(index, ((i + 1) % x) * y * z + j * z + k)
   return G
 
 ############################## Figure Plotting #################################
@@ -191,12 +199,12 @@ def plot_shortest_path_lengths(topo_func, name):
 ################################# Main #########################################
 
 if __name__ == '__main__':
-  # plot_shortest_path_lengths(SWRingTopo, 'SW Ring')
-  # plot_shortest_path_lengths(SW2DTorusTopo, 'SW 2DTor')
-  # plot_shortest_path_lengths(SW3DHexTorusTopo, 'SW 3DHexTor')
-  # plot_shortest_path_lengths(CamCubeTopo, 'CamCube')
-  # plt.savefig('shortest_path_lengths.png')
+  plot_shortest_path_lengths(SWRingTopo, 'SW Ring')
+  plot_shortest_path_lengths(SW2DTorusTopo, 'SW 2DTor')
+  plot_shortest_path_lengths(SW3DHexTorusTopo, 'SW 3DHexTor')
+  plot_shortest_path_lengths(CamCubeTopo, 'CamCube')
+  plt.savefig('shortest_path_lengths.png')
 
-  SWRingTopo(n=10)
+  # SWRingTopo(n=10)
 
   # draw_graph(SW2DTorusTopo())

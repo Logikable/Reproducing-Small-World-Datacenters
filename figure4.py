@@ -10,7 +10,34 @@ import numpy as np
 # Number of hops away we should look in a greedy algorithm.
 k = 3
 
+SW2DTorusDims = (32, 48)
+SW3DHexTorusDims = (16, 8, 12)
+CamCubeDims = (8, 12, 16)
+
 ###################### Topology Distance Calculations ##########################
+
+def inc_or_dec(n, frm, to):
+  """Return whether to go in the +ve direction or the -ve direction.
+  """
+  c1 = abs(frm - to)
+  c2 = n - c1
+  if c1 < c2:
+    if frm < to:
+      return 1
+    else:
+      return -1
+  else:
+    if frm < to:
+      return -1
+    else:
+      return 1
+
+def down_or_up(y, z):
+  """
+  Return whether the vertical edge in 3DHex goes up or down.
+  Returns 1 for down, -1 for up.
+  """
+  return 1 if (y + z) % 2 == 1 else -1
 
 ### To create a greedy algorithm for a new topology, implement
 ### manhattan_distance() and manhattan_next_hop() for that topology.
@@ -30,116 +57,144 @@ def SWRing_manhattan_distance(n, frm, to):
 
 def SWRing_manhattan_next_hop(n, frm, to):
   assert frm != to
-  c1 = abs(frm - to)
-  c2 = n - c1
-  if c1 < c2:
-    if frm < to:
-      return frm + 1
-    else:
-      return frm - 1
-  else:
-    if frm < to:
-      return (frm + n - 1) % n
-    else:
-      return (frm + 1) % n
+  return (frm + n + inc_or_dec(n, frm, to)) % n
 
 
-h_2d, w_2d = SW2DTorusDims
-def x_y(node):
+def x_y(node, SW2DTorusDims):
   """Returns the (x, y) coordinates of a given node."""
+  h_2d, w_2d = SW2DTorusDims
   x = node // w_2d
   y = node % w_2d
   return (x, y)
 
-def SW2DTorus_manhattan_distance(n, frm, to):
-  frm_x, frm_y = x_y(frm)
-  to_x, to_y = x_y(to)
-  return SWRing_manhattan_distance(h_2d, frm_x, to_x) +
-      SWRing_manhattan_distance(w_2d, frm_y, to_y)
+def SW2DTorus_manhattan_distance(n, frm, to, SW2DTorusDims=SW2DTorusDims):
+  h_2d, w_2d = SW2DTorusDims
+  frm_x, frm_y = x_y(frm, SW2DTorusDims)
+  to_x, to_y = x_y(to, SW2DTorusDims)
+  return (SWRing_manhattan_distance(h_2d, frm_x, to_x) +
+      SWRing_manhattan_distance(w_2d, frm_y, to_y))
 
-def SW2DTorus_manhattan_next_hop(n, frm, to):
+def SW2DTorus_manhattan_next_hop(n, frm, to, SW2DTorusDims=SW2DTorusDims):
+  h_2d, w_2d = SW2DTorusDims
   # This assertion has to be done at some point; we choose to do it here.
   assert h_2d * w_2d == n
-  frm_x, frm_y = x_y(frm)
-  to_x, to_y = x_y(to)
+  frm_x, frm_y = x_y(frm, SW2DTorusDims)
+  to_x, to_y = x_y(to, SW2DTorusDims)
   x_manhattan_distance = SWRing_manhattan_distance(h_2d, frm_x, to_x)
   y_manhattan_distance = SWRing_manhattan_distance(w_2d, frm_y, to_y)
   if x_manhattan_distance > y_manhattan_distance:
-    return SWRing_manhattan_next_hop(h_2d, frm_x, to_x) * w_2d +
-        frm_y
+    return (SWRing_manhattan_next_hop(h_2d, frm_x, to_x) * w_2d +
+        frm_y)
   else:
-    return frm_x * w_2d +
-        SWRing_manhattan_next_hop(w_2d, frm_y, to_y)
+    return (frm_x * w_2d +
+        SWRing_manhattan_next_hop(w_2d, frm_y, to_y))
 
 
-d_3d, h_3d, w_3d = SW3DHexTorusDims
-def x_y_z_sw(node):
+def x_y_z_sw(node, SW3DHexTorusDims):
   """Returns the (x, y, z) coordinates of a given node in the SW3DHexTorusTopo.
   """
+  d_3d, h_3d, w_3d = SW3DHexTorusDims
   x = node // (h_3d * w_3d)
   y = (node % (h_3d * w_3d)) // w_3d
   z = node % w_3d
   return (x, y, z)
 
-def SW3DHexTorus_manhattan_distance(n, frm, to):
-  frm_x, frm_y, frm_z = x_y_z_sw(frm)
-  to_x, to_y, to_z = x_y_z_sw(to)
-  # TODO
-  assert False
+def SW3DHexTorus_manhattan_distance(n, frm, to,
+                                    SW3DHexTorusDims=SW3DHexTorusDims):
+  d_3d, h_3d, w_3d = SW3DHexTorusDims
+  frm_x, frm_y, frm_z = x_y_z_sw(frm, SW3DHexTorusDims)
+  to_x, to_y, to_z = x_y_z_sw(to, SW3DHexTorusDims)
+  x_manhattan_distance = SWRing_manhattan_distance(d_3d, frm_x, to_x)
+  y_manhattan_distance = SWRing_manhattan_distance(h_3d, frm_y, to_y)
+  z_manhattan_distance = SWRing_manhattan_distance(w_3d, frm_z, to_z)
+  ### Check whether the y-axis direction we're traveling in
+  ### is the same as the direction of the y-axis regular edge
+  ### attached to the frm node. This affects the distance.
+  if down_or_up(frm_y, frm_z) == inc_or_dec(h_3d, frm_y, to_y):
+    comparison_y_manhattan_distance = y_manhattan_distance - 1
+  else:
+    comparison_y_manhattan_distance = y_manhattan_distance
 
-def SW3DHexTorus_manhattan_next_hop(n, frm, to):
+  if comparison_y_manhattan_distance <= z_manhattan_distance:
+    actual_z_distance = z_manhattan_distance
+  else:
+    extra = int(math.ceil(
+        (comparison_y_manhattan_distance - z_manhattan_distance) / 2))
+    actual_z_distance = z_manhattan_distance + 2 * extra
+  return x_manhattan_distance + y_manhattan_distance + actual_z_distance
+
+def SW3DHexTorus_manhattan_next_hop(n, frm, to,
+                                    SW3DHexTorusDims=SW3DHexTorusDims):
+  d_3d, h_3d, w_3d = SW3DHexTorusDims
   # This assertion has to be done at some point; we choose to do it here.
   assert d_3d * h_3d * w_3d == n
-  frm_x, frm_y, frm_z = x_y_z_sw(frm)
-  to_x, to_y, to_z = x_y_z_sw(to)
-  # TODO
-  assert False
+  frm_x, frm_y, frm_z = x_y_z_sw(frm, SW3DHexTorusDims)
+  ### There are 5 candidate hops; one for each of the regular links
+  ### connected to this node. We simply test all of their distances
+  ### and pick the least.
+  candidate_hops = [
+      frm_x * h_3d * w_3d + frm_y * w_3d + (frm_z + 1) % w_3d,
+      frm_x * h_3d * w_3d + frm_y * w_3d + (frm_z + w_3d - 1) % w_3d,
+      (frm_x * h_3d * w_3d +
+          ((frm_y + h_3d + down_or_up(frm_y, frm_z)) % h_3d) * w_3d +
+          frm_z),
+      ((frm_x + 1) % d_3d) * h_3d * w_3d + frm_y * w_3d + frm_z,
+      ((frm_x + d_3d - 1) % d_3d) * h_3d * w_3d + frm_y * w_3d + frm_z,
+  ]
+  distances = []
+  for candidate in candidate_hops:
+    distance = SW3DHexTorus_manhattan_distance(n, candidate, to,
+                                               SW3DHexTorusDims)
+    distances.append((distance, candidate))
+  best_next_hop = min(distances, key=lambda x: x[0])
+  return best_next_hop[1]
 
 
-d_cc, h_cc, w_cc = CamCubeDims
-def x_y_z_cc(node):
+def x_y_z_cc(node, CamCubeDims):
   """Returns the (x, y, z) coordinates of a given node in the CamCubeTopo.
   """
+  d_cc, h_cc, w_cc = CamCubeDims
   x = node // (h_cc * w_cc)
   y = (node % (h_cc * w_cc)) // w_cc
   z = node % w_cc
   return (x, y, z)
 
-def CamCube_manhattan_distance(n, frm, to):
-  frm_x, frm_y, frm_z = x_y_z_cc(frm)
-  to_x, to_y, to_z = x_y_z_cc(to)
-  return SWRing_manhattan_distance(d_cc, frm_x, to_x) +
+def CamCube_manhattan_distance(n, frm, to, CamCubeDims=CamCubeDims):
+  d_cc, h_cc, w_cc = CamCubeDims
+  frm_x, frm_y, frm_z = x_y_z_cc(frm, CamCubeDims)
+  to_x, to_y, to_z = x_y_z_cc(to, CamCubeDims)
+  return (SWRing_manhattan_distance(d_cc, frm_x, to_x) +
       SWRing_manhattan_distance(h_cc, frm_y, to_y) +
-      SWRing_manhattan_distance(w_cc, frm_z, to_z)
+      SWRing_manhattan_distance(w_cc, frm_z, to_z))
 
-def CamCube_manhattan_next_hop(n, frm, to):
+def CamCube_manhattan_next_hop(n, frm, to, CamCubeDims=CamCubeDims):
+  d_cc, h_cc, w_cc = CamCubeDims
   # This assertion has to be done at some point; we choose to do it here.
   assert d_cc * h_cc * w_cc == n
-  frm_x, frm_y, frm_z = x_y_z_cc(frm)
-  to_x, to_y, to_z = x_y_z_cc(to)
+  frm_x, frm_y, frm_z = x_y_z_cc(frm, CamCubeDims)
+  to_x, to_y, to_z = x_y_z_cc(to, CamCubeDims)
   x_manhattan_distance = SWRing_manhattan_distance(d_cc, frm_x, to_x)
   y_manhattan_distance = SWRing_manhattan_distance(h_cc, frm_y, to_y)
   z_manhattan_distance = SWRing_manhattan_distance(w_cc, frm_z, to_z)
-  min_distance = min(x_manhattan_distance, y_manhattan_distance,
+  max_distance = max(x_manhattan_distance, y_manhattan_distance,
                      z_manhattan_distance)
-  if x_manhattan_distance == min_distance:
-    return SWRing_manhattan_next_hop(d_cc, frm_x, to_x) * h_cc * w_cc +
+  if x_manhattan_distance == max_distance:
+    return (SWRing_manhattan_next_hop(d_cc, frm_x, to_x) * h_cc * w_cc +
         frm_y * w_cc +
-        frm_z
-  elif y_manhattan_distance == min_distance:
-    return frm_x * h_cc * w_cc +
+        frm_z)
+  elif y_manhattan_distance == max_distance:
+    return (frm_x * h_cc * w_cc +
         SWRing_manhattan_next_hop(h_cc, frm_y, to_y) * w_cc +
-        frm_z
+        frm_z)
   else:
-    return frm_x * h_cc * w_cc +
+    return (frm_x * h_cc * w_cc +
         frm_y * w_cc +
-        SWRing_manhattan_next_hop(w_cc, frm_z, to_z)
+        SWRing_manhattan_next_hop(w_cc, frm_z, to_z))
 
 ############################# Figure Plotting ##################################
 
-def save_topo(topo, name):
+def save_topo(G, name):
   """Saves the topology in an adjacency list text format."""
-  G = topo()
   nx.readwrite.adjlist.write_adjlist(G, f'{name}.adjlist')
 
 def load_topo(name):
@@ -148,7 +203,9 @@ def load_topo(name):
   inconsistent between loads.
   """
   G = nx.readwrite.adjlist.read_adjlist(f'{name}.adjlist')
-  return nx.relabel.convert_node_labels_to_integers(G)
+  n = len(G)
+  mapping = {str(x): x for x in np.arange(n)}
+  return nx.relabel.relabel_nodes(G, mapping)
 
 def make_x_hop_lookup(G):
   """
@@ -210,11 +267,20 @@ def make_routing_table(n, manhattan_distance, manhattan_next_hop,
       candidate_next_hop = manhattan_next_hop(n, frm, to)
       candidate_dist = manhattan_distance(n, candidate_next_hop, to) + 1
       if x_hop_lookup:
+        # Look for other candidate hops in the x_hop_lookup table (if present).
         for x in np.arange(1, k+1):
           for x_hop in x_hop_lookup[x][frm]:
             new_dist = manhattan_distance(n, x_hop, to) + x
             if new_dist < candidate_dist:
-              candidate_next_hop = x_hop
+              ### We now have a node that is x nodes away from frm,
+              ###   but we need a node that is one node away
+              ###   to form the routing table.
+              ### Get the actual next hop using a trick:
+              ### Take the intersection of the 1-hop neighbours of frm
+              ###   and the (x-1)-hop neighbours of x_hop,
+              ###   and pick an arbitrary node.
+              intersection = x_hop_lookup[1][frm] & x_hop_lookup[x-1][x_hop]
+              candidate_next_hop = intersection.pop()
               candidate_dist = new_dist
       routing_table[frm][to] = candidate_next_hop
   return routing_table
@@ -304,6 +370,7 @@ def greedy_shortest_paths(G, routing_table):
       dist = 0
       cur_node = frm
       while cur_node != to:
+        assert G.has_edge(cur_node, routing_table[cur_node][to])
         cur_node = routing_table[cur_node][to]
         dist += 1
       # Once the destination has been reached, update the running mean/std.
@@ -314,12 +381,13 @@ def greedy_shortest_paths(G, routing_table):
       mean = new_mean
   return (mean, math.sqrt(std / (paths_seen - 1)))
 
-def plot_greedy_shortest_path_lengths(name):
+def plot_greedy_shortest_path_lengths(name, manhattan_distance,
+                                      manhattan_next_hop,
+                                      routing_table_func):
   """Plots one bar of figure 4 of the SWDCs paper."""
   print(f'Loading topology {name}...')
   G = load_topo(name)
-  routing_table = greedy_routing_table(G, SWRing_manhattan_distance,
-                                       SWRing_manhattan_next_hop)
+  routing_table = routing_table_func(G, manhattan_distance, manhattan_next_hop)
   print('Calculating greedy shortest paths...')
   mean, std = greedy_shortest_paths(G, routing_table)
 
@@ -329,6 +397,28 @@ def plot_greedy_shortest_path_lengths(name):
 ################################### Main #######################################
 
 if __name__ == '__main__':
-  # save_topo(SWRingTopo, 'SWRingTopo_10240')
-  plot_greedy_shortest_path_lengths('SWRingTopo_10240')
+  # plot_greedy_shortest_path_lengths('SWRingTopo_1024')
+  # plt.savefig('shortest_path_lengths_greedy.png')
+
+  plot_greedy_shortest_path_lengths('SWRingTopo_1536',
+                                    SWRing_manhattan_distance,
+                                    SWRing_manhattan_next_hop,
+                                    greedy_routing_table)
+  plot_greedy_shortest_path_lengths('SW2DTorusTopo_1536_32_48',
+                                    SW2DTorus_manhattan_distance,
+                                    SW2DTorus_manhattan_next_hop,
+                                    greedy_routing_table)
+  plot_greedy_shortest_path_lengths('SW3DHexTorusTopo_1536_16_8_12',
+                                    SW3DHexTorus_manhattan_distance,
+                                    SW3DHexTorus_manhattan_next_hop,
+                                    greedy_routing_table)
+  plot_greedy_shortest_path_lengths('CamCubeTopo_1536_8_12_16',
+                                    CamCube_manhattan_distance,
+                                    CamCube_manhattan_next_hop,
+                                    regular_routing_table)
   plt.savefig('shortest_path_lengths_greedy.png')
+
+  # save_topo(SWRingTopo(n=1536), 'SWRingTopo_1536')
+  # save_topo(SW2DTorusTopo(dims=(32, 48)), 'SW2DTorusTopo_1536_32_48')
+  # save_topo(SW3DHexTorusTopo(dims=(16, 8, 12)), 'SW3DHexTorusTopo_1536_16_8_12')
+  # save_topo(CamCubeTopo(dims=(8, 12, 16)), 'CamCubeTopo_1536_8_12_16')
