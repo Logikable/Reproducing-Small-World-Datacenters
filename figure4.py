@@ -340,6 +340,28 @@ def regular_routing_table(G, manhattan_distance, manhattan_next_hop):
   routing_table = make_routing_table(n, manhattan_distance, manhattan_next_hop)
   return routing_table
 
+def save_routing_table(routing_table, name):
+  """Saves the routing table."""
+  with open(f'{name}.rt', 'w+') as f:
+    for src, dsts in routing_table.items():
+      for dst, next_hop in dsts.items():
+        f.write(f'{src} {dst} {next_hop}\n')
+
+def load_routing_table(name):
+  """
+  Loads the routing table into a Dict[Dict[int]] format, indexed first by 
+  source node, then by destination node. Contains the next node in the path.
+  """
+  routing_table = defaultdict(dict)
+  with open(f'{name}.rt', 'r') as f:
+    for line in f.readlines():
+      tokens = line.split(' ')
+      if len(tokens) != 3:
+        continue
+      src, dst, next_hop = int(tokens[0]), int(tokens[1]), int(tokens[2])
+      routing_table[src][dst] = next_hop
+  return routing_table
+
 def greedy_shortest_paths(G, routing_table):
   """
   Calculate shortest paths using greedy geographical routing.

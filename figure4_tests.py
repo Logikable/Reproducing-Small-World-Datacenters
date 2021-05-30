@@ -21,6 +21,19 @@ class TestSaveLoadTopo(unittest.TestCase):
     self.assertCountEqual(list(save_G.nodes()), list(load_G.nodes()))
     self.assertCountEqual(save_G_edges, load_G_edges)
 
+class TestSaveLoadRoutingTable(unittest.TestCase):
+  def test_simple(self):
+    print('======== SaveLoadRoutingTable ========')
+    name = 'TestSaveLoadRoutingTable_test_simple'
+    G = SWRingTopo(n=100, degree=3)
+    save_rt = greedy_routing_table(G, 
+                                   SWRing_manhattan_distance, 
+                                   SWRing_manhattan_next_hop)
+    save_routing_table(save_rt, name)
+    load_rt = load_routing_table(name)
+
+    self.assertEqual(save_rt, load_rt)
+
 class TestSW3DHexTorus(unittest.TestCase):
     def x_y_z_to_node(self, x, y, z, dims):
         dim_x, dim_y, dim_z = dims
