@@ -11,23 +11,23 @@ from ipmininet.router.config.zebra import Zebra
 import numpy as np
 import matplotlib.pyplot as plt
 
+from figure4 import load_routing_table
+
 class CustomTopo(IPTopo):
-  def __init__(self, adj_file, routing_table_file):
-    IPTopo.__init__(self)
-    
+  def __init__(self, adj_name, routing_table_name):
     self.adj = {}
     self.ip_addresses = {}
     self.routing_table = {}
 
     # parse adjacency list
     print('Parsing adjacency list...')
-    with open(adj_file, 'r') as f:
+    with open(f'{adj_name}.adjlist', 'r') as f:
       for line in f.readlines():
-        tokens = line.split(' ')
-
         # ignore commented and blank lines
-        if tokens[0] == '' or tokens[0] == '#':
+        if line == '' or line.startswith('#'):
           continue
+
+        tokens = line.split(' ')
 
         # update adjacency list
         v = int(tokens[0])
@@ -39,16 +39,19 @@ class CustomTopo(IPTopo):
 
     # parse routing table
     print('Parsing routing table...')
-    with open(routing_table_file, 'r') as f:
-      # TODO
-      pass
+    self.routing_table = load_routing_table(routing_table_name)
 
     # calculate number of nodes
     self.n = max(self.adj.keys())
 
+    IPTopo.__init__(self)
+
   def node_to_ip(self, v):
-    """Converts a node id to an IPv6 address."""
-    return ''
+    """
+    Converts a node id to an IPv6 address.
+    Assumes v <= 9999.
+    """
+    return f'2001:2345:{str(v)}::'
 
   def build(self, *args, **kwargs):
     routers = {}
@@ -57,7 +60,7 @@ class CustomTopo(IPTopo):
     print('Adding routers...')
     for u, tmp in self.routing_table.items():
       routes = []
-      for v, next_hop in tmp:
+      for v, next_hop in tmp.items():
         routes.append(StaticRoute(self.ip_addresses[v], self.ip_addresses[next_hop]))
       routers[u] = self.addRouter_v6(f'r{u}', routes)
 
@@ -71,6 +74,7 @@ class CustomTopo(IPTopo):
         # params2={'ip': TODO}
         )
 
+    print('Building...')
     super(CustomTopo, self).build(*args, **kwargs)
 
   def addRouter_v6(self, name, routes):
@@ -92,10 +96,12 @@ def uniform_random_benchmark(adj_file, routing_table_file):
   net.start()
   net.pingAll()
 
-  for i in range(topo.n):
-    start_ping(net, topo.n, i)
+  IPCLI(net)
+
+  # for i in range(topo.n):
+  #   start_ping(net, topo.n, i)
 
   net.stop()
 
 if __name__ == '__main__':
-  uniform_random_benchmark('todo', 'todo')
+  uniform_random_benchmark('TestCustomTopo_test_simple', 'TestCustomTopo_test_simple')
