@@ -10,9 +10,9 @@ import numpy as np
 # Number of hops away we should look in a greedy algorithm.
 k = 3
 
-SW2DTorusDims = (32, 48)
-SW3DHexTorusDims = (16, 8, 12)
-CamCubeDims = (8, 12, 16)
+SW2DTorusDims = (80, 128)
+SW3DHexTorusDims = (20, 16, 32)
+CamCubeDims = (16, 20, 32)
 
 ###################### Topology Distance Calculations ##########################
 
@@ -397,28 +397,48 @@ def plot_greedy_shortest_path_lengths(name, manhattan_distance,
 ################################### Main #######################################
 
 if __name__ == '__main__':
-  # plot_greedy_shortest_path_lengths('SWRingTopo_1024')
-  # plt.savefig('shortest_path_lengths_greedy.png')
-
-  plot_greedy_shortest_path_lengths('SWRingTopo_1536',
-                                    SWRing_manhattan_distance,
-                                    SWRing_manhattan_next_hop,
-                                    greedy_routing_table)
-  plot_greedy_shortest_path_lengths('SW2DTorusTopo_1536_32_48',
-                                    SW2DTorus_manhattan_distance,
-                                    SW2DTorus_manhattan_next_hop,
-                                    greedy_routing_table)
-  plot_greedy_shortest_path_lengths('SW3DHexTorusTopo_1536_16_8_12',
-                                    SW3DHexTorus_manhattan_distance,
-                                    SW3DHexTorus_manhattan_next_hop,
-                                    greedy_routing_table)
-  plot_greedy_shortest_path_lengths('CamCubeTopo_1536_8_12_16',
-                                    CamCube_manhattan_distance,
-                                    CamCube_manhattan_next_hop,
-                                    regular_routing_table)
-  plt.savefig('shortest_path_lengths_greedy.png')
-
   # save_topo(SWRingTopo(n=1536), 'SWRingTopo_1536')
   # save_topo(SW2DTorusTopo(dims=(32, 48)), 'SW2DTorusTopo_1536_32_48')
   # save_topo(SW3DHexTorusTopo(dims=(16, 8, 12)), 'SW3DHexTorusTopo_1536_16_8_12')
   # save_topo(CamCubeTopo(dims=(8, 12, 16)), 'CamCubeTopo_1536_8_12_16')
+
+  # plot_greedy_shortest_path_lengths('SWRingTopo_1536',
+  #                                   SWRing_manhattan_distance,
+  #                                   SWRing_manhattan_next_hop,
+  #                                   greedy_routing_table)
+  # plot_greedy_shortest_path_lengths('SW2DTorusTopo_1536_32_48',
+  #                                   SW2DTorus_manhattan_distance,
+  #                                   SW2DTorus_manhattan_next_hop,
+  #                                   greedy_routing_table)
+  # plot_greedy_shortest_path_lengths('SW3DHexTorusTopo_1536_16_8_12',
+  #                                   SW3DHexTorus_manhattan_distance,
+  #                                   SW3DHexTorus_manhattan_next_hop,
+  #                                   greedy_routing_table)
+  # plot_greedy_shortest_path_lengths('CamCubeTopo_1536_8_12_16',
+  #                                   CamCube_manhattan_distance,
+  #                                   CamCube_manhattan_next_hop,
+  #                                   regular_routing_table)
+  # plt.savefig('shortest_path_lengths_greedy.png')
+
+  save_topo(SWRingTopo(n=10240), 'SW Ring')
+  save_topo(SW2DTorusTopo(dims=(80, 128)), 'SW 2DTor')
+  save_topo(SW3DHexTorusTopo(dims=(20, 16, 32)), 'SW 3DHexTor')
+  save_topo(CamCubeTopo(dims=(16, 20, 32)), 'CamCube')
+
+  plot_greedy_shortest_path_lengths('SW Ring',
+                                    SWRing_manhattan_distance,
+                                    SWRing_manhattan_next_hop,
+                                    greedy_routing_table)
+  plot_greedy_shortest_path_lengths('SW 2DTor',
+                                    SW2DTorus_manhattan_distance,
+                                    SW2DTorus_manhattan_next_hop,
+                                    greedy_routing_table)
+  plot_greedy_shortest_path_lengths('SW 3DHexTor',
+                                    SW3DHexTorus_manhattan_distance,
+                                    SW3DHexTorus_manhattan_next_hop,
+                                    greedy_routing_table)
+  plot_greedy_shortest_path_lengths('CamCube',
+                                    CamCube_manhattan_distance,
+                                    CamCube_manhattan_next_hop,
+                                    regular_routing_table)
+  plt.savefig('shortest_path_lengths_greedy.png')

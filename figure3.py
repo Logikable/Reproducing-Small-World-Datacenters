@@ -2,20 +2,20 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-n = 1536
-degree = 6
-
-SW2DTorusDims = (32, 48)
-SW3DHexTorusDims = (16, 8, 12)
-CamCubeDims = (8, 12, 16)
-
-# n = 10240
+# n = 1536
 # degree = 6
 
-# SW2DTorusDims = [80, 128]
-# # Depth, long edge (vertical in diagram), short edge (horizontal).
-# SW3DHexTorusDims = [20, 16, 32]
-# CamCubeDims = [16, 20, 32]
+# SW2DTorusDims = (32, 48)
+# SW3DHexTorusDims = (16, 8, 12)
+# CamCubeDims = (8, 12, 16)
+
+n = 10240
+degree = 6
+
+SW2DTorusDims = [80, 128]
+# Depth, long edge (vertical in diagram), short edge (horizontal).
+SW3DHexTorusDims = [20, 16, 32]
+CamCubeDims = [16, 20, 32]
 
 ############################ Topology Generation ###############################
 
